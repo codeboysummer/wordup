@@ -1,26 +1,44 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from "react-query";
+import { VStack } from "@chakra-ui/react";
+import VoicetoText from "./comps/VoicetoText";
+import Welcome from "./comps/Welcome";
+import Word from "./comps/Word";
+const queryClient = new QueryClient();
 
-function App() {
+export default function App() {
+  const fetchword = async (word: String) => {
+    const res = await fetch(
+      `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`
+    );
+    if (!res.ok) {
+      throw new Error(`${res.status}: ${await res.text()}`);
+    }
+
+    return res.json();
+  };
+  const fetchsyno = async (word: String) => {
+    let url = `https://words.bighugelabs.com/api/2/b104974966695dadee1a67024b23dfde/${word}/json`;
+
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`${res.status}: ${await res.text()}`);
+    }
+    return res.json();
+  };
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <>
+        <VStack bg={"black"} h={"100vh"} w={"100%"}>
+          <Welcome />
+          <Word fetchword={fetchword} fetchsyno={fetchsyno} />
+        </VStack>
+      </>
+    </QueryClientProvider>
   );
 }
-
-export default App;
